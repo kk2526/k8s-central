@@ -1,2 +1,2 @@
 # k8s-central
-Interactive Kubernetes API to retrieve unused objects sitting in your clusters
+API to retrieve Kubernetes unused objects sitting in your clusters and much more..
