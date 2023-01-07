@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	api "***REMOVED***/ecp-cluster-tool/pkg/api"
-	controller "***REMOVED***/ecp-cluster-tool/pkg/controller"
-	"***REMOVED***/ecp-cluster-tool/pkg/utils"
+	api "github.com/kk2526/k8s-central/pkg/api"
+	controller "github.com/kk2526/k8s-central/pkg/controller"
+	"github.com/kk2526/k8s-central/pkg/utils"
 )
 
 var profile string

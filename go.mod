@@ -1,4 +1,4 @@
-module ***REMOVED***/ecp-cluster-tool
+module github.com/kk2526/k8s-central
 
 go 1.19
 
