@@ -47,3 +47,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace github.com/kk2526/k8s-central => /home/kkhanna/GH/k8s-central

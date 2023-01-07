@@ -48,5 +48,4 @@ func ObjectsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	respJSON, _ := ***REMOVED***.EncodeJSON(resp)
 	fmt.Fprint(w, respJSON)
-
 }

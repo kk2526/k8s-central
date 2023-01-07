@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,6 +53,7 @@ func init() {
 }
 
 func NewConfig(kubeconfig string) (*rest.Config, error) {
+
 	if kubeconfig != "" {
 		log.Println("KUBECONFIG Env Var Set: Using out of cluster config")
 		cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -129,6 +131,13 @@ func (n *NodeData) AnnotateStatus() {
 func CreateK8sClient() *kubernetes.Clientset {
 	log.Println("Setting up connection to Kubernetes API")
 	kubeconfig, _ := os.LookupEnv("KUBECONFIG")
+	log.Println("SOS")
+	if kubeconfig == "" {
+		log.Println("KUBECONFIG HERE")
+		kubeconfig = filepath.Join(
+			os.Getenv("HOME"), ".kube", "config",
+		)
+	}
 
 	config, err := NewConfig(kubeconfig)
 	if err != nil {
