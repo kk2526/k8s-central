@@ -36,7 +36,7 @@ type staleObjData struct {
 }
 
 var (
-	excludens, _ = regexp.Compile("kube.*|cattle.*|ingress.*|ims.*|ping.*|weblo*|sandbox")
+	excludens, _ = regexp.Compile("kube.*|cattle.*|ingress-nginx")
 )
 
 func (ob *K8sObj) FetchUsedObjs() {

@@ -9,7 +9,7 @@ var client *clientset.Clientset
 type APIRequestParams struct {
 	namespace  string
 	objectType string
-	state      string
+	podState   string
 	stale      bool
 }
 

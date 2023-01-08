@@ -157,17 +157,17 @@ func GetNamespaces(Client *clientset.Clientset) []string {
 	return result
 }
 
-func (c *K8sObj) GetPods(Client *clientset.Clientset, ns string, state string) {
+func (c *K8sObj) GetPods(Client *clientset.Clientset, ns string, podState string) {
 	pods, err := Client.CoreV1().Pods(ns).List(context.TODO(), v1.ListOptions{})
 
 	if err != nil {
 		fmt.Printf("Error while fetching all Deployments. Error: %v", err)
 	}
 
-	if state == "" {
+	if podState == "" {
 		c.Pods = pods.Items
 
-	} else if state == "healthy" {
+	} else if podState == "healthy" {
 		for _, i := range pods.Items {
 			if len(i.Status.ContainerStatuses) != 0 {
 				if i.Status.ContainerStatuses[0].State.Running != nil {
@@ -176,7 +176,7 @@ func (c *K8sObj) GetPods(Client *clientset.Clientset, ns string, state string) {
 			}
 		}
 
-	} else if state == "unhealthy" {
+	} else if podState == "unhealthy" {
 		for _, i := range pods.Items {
 			if len(i.Status.ContainerStatuses) != 0 {
 				if i.Status.ContainerStatuses[0].State.Running == nil {

@@ -12,12 +12,12 @@ import (
 var profile string
 
 func init() {
-	profile, _ = os.LookupEnv("ECP_APP_PROFILE")
-	if profile == "daemonset" || profile == "ui" || profile == "api" || profile == "controller" {
-		log.Println("ECP_APP_PROFILE ENV VAR IS SET")
+	profile, _ = os.LookupEnv("APP_PROFILE")
+	if profile == "ui" || profile == "api" || profile == "controller" {
+		log.Println("APP_PROFILE ENV VAR IS SET")
 	} else {
-		log.Println("ECP_APP_PROFILE ENV VAR IS NOT SET, defaulting to dev")
-		profile = "dev"
+		log.Println("APP_PROFILE ENV VAR IS NOT SET, defaulting to api")
+		profile = "api"
 	}
 
 }
@@ -39,7 +39,7 @@ func main() {
 	case "dev":
 		api.Run()
 		utils.ListenServe()
-
+		controller.Run()
 	default:
 		log.Printf("No profile chosen")
 	}

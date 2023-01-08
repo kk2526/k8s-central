@@ -28,7 +28,7 @@ func ObjectsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "deployments":
 		objResponseData.GetDeployment(client, reqParam.namespace, reqParam.stale)
 	case "pods":
-		objResponseData.GetPods(client, reqParam.namespace, reqParam.state)
+		objResponseData.GetPods(client, reqParam.namespace, reqParam.podState)
 	case "namespaces":
 		resp.Data = ***REMOVED***.GetNamespaces(client)
 	default:
@@ -39,7 +39,7 @@ func ObjectsAPIHandler(w http.ResponseWriter, r *http.Request) {
 		objResponseData.GetSecrets(client, reqParam.namespace, reqParam.stale)
 		objResponseData.GetPVC(client, reqParam.namespace, reqParam.stale)
 		objResponseData.GetDeployment(client, reqParam.namespace, reqParam.stale)
-		objResponseData.GetPods(client, reqParam.namespace, reqParam.state)
+		objResponseData.GetPods(client, reqParam.namespace, reqParam.podState)
 	}
 
 	if reqParam.objectType != "namespaces" {
