@@ -11,6 +11,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
+	networking "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -22,6 +23,7 @@ type K8sObj struct {
 	Endpoints              []v1.Endpoints             `json:"Endpoints"`
 	PersistentVolumeClaims []v1.PersistentVolumeClaim `json:"PVCs"`
 	Pods                   []v1.Pod                   `json:"Pods"`
+	Ingress                []networking.Ingress       `json:"Ingress"`
 }
 
 // Struct internally used for comparision
@@ -40,15 +42,14 @@ var (
 )
 
 func (ob *K8sObj) FetchUsedObjs() {
+
 	log.Printf("Getting All Used Objects\n")
+
 	log.Printf("Getting Used Endpoints..")
-
 	eps, err := client.CoreV1().Endpoints("").List(context.TODO(), metav1.ListOptions{})
-
 	if err != nil {
 		log.Printf("Error loading Endpoints %v", err)
 	}
-
 	for _, ep := range eps.Items {
 		if !excludens.MatchString(ep.Namespace) {
 			if ep.Subsets != nil {
@@ -62,7 +63,6 @@ func (ob *K8sObj) FetchUsedObjs() {
 		log.Printf("Error loading pods %v", err)
 	}
 	log.Printf("Iterating Pods For Used Storage Objects")
-
 	for _, i := range pods.Items {
 		if !excludens.MatchString(i.Namespace) {
 			container := i.Spec.Containers
@@ -203,6 +203,37 @@ func GetUnusedObjs(used K8sObj) K8sObj {
 		}
 
 	}
+
+	//Get Un-Used Ingresses
+	ings, err := client.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		log.Printf("Error loading Ingress %v", err)
+	}
+	for _, i := range ings.Items {
+		if i.Spec.Rules != nil {
+			for _, rule := range i.Spec.Rules {
+				m := map[string]bool{}
+				for _, path := range rule.HTTP.Paths {
+					var match bool
+					if _, ok := m[path.Backend.Service.Name]; !ok { //Make sure unique service name within Path are being compared
+						m[path.Backend.Service.Name] = true
+						svcinIng := K8sObjMeta{path.Backend.Service.Name, i.Namespace}
+						for _, j := range used.Endpoints {
+							usedsvc := K8sObjMeta{j.Name, j.Namespace}
+							if svcinIng == usedsvc {
+								match = true
+								_ = match
+							}
+						}
+						if !match {
+							staleObjs.Ingress = append(staleObjs.Ingress, i)
+						}
+					}
+				}
+			}
+		}
+	}
+
 	//Get UnUsed Secrets
 	allsecrets, err := client.CoreV1().Secrets("").List(context.TODO(), metav1.ListOptions{})
 
@@ -228,6 +259,7 @@ func GetUnusedObjs(used K8sObj) K8sObj {
 			}
 		}
 	}
+
 	//Get UnUsed PVCs
 	allpvc, err := client.CoreV1().PersistentVolumeClaims("").List(context.TODO(), metav1.ListOptions{})
 
@@ -251,7 +283,6 @@ func GetUnusedObjs(used K8sObj) K8sObj {
 			}
 		}
 	}
-
 	return staleObjs
 }
 
@@ -365,6 +396,30 @@ func (n *K8sObj) AnnotateStaleObj(m *staleObjData) {
 		i.SetAnnotations(annotations)
 		client.CoreV1().PersistentVolumeClaims(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
 		log.Printf("Updated Annotation on PVC: %v", i.Name)
+	}
+
+	// Annotate Ingress
+	ingress := n.Ingress
+	for _, i := range ingress {
+		annotations := i.GetAnnotations()
+		if annotations == nil {
+			annotations = make(map[string]string)
+			jsonStr, err := json.Marshal(m)
+			if err != nil {
+				fmt.Printf("Error: %s", err.Error())
+			}
+			annotations["***REMOVED***/stale-object"] = string(jsonStr)
+
+		} else {
+			jsonStr, err := json.Marshal(m)
+			if err != nil {
+				fmt.Printf("Error: %s", err.Error())
+			}
+			annotations["***REMOVED***/stale-object"] = string(jsonStr)
+		}
+		i.SetAnnotations(annotations)
+		client.NetworkingV1().Ingresses(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
+		log.Printf("Updated Annotation on Ingress: %v", i.Name)
 	}
 }
 
