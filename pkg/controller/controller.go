@@ -24,7 +24,7 @@ func Run() {
 		d := staleObjData{}
 		c := SetUnusedObj()
 
-		d.CreateAnnotationData()
+		d.BuildAnnotationData()
 		c.AnnotateStaleObj(&d)
 	}
 

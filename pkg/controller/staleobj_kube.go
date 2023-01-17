@@ -42,7 +42,6 @@ var (
 )
 
 func (ob *K8sObj) FetchUsedObjs() {
-
 	log.Printf("Getting All Used Objects\n")
 
 	log.Printf("Getting Used Endpoints..")
@@ -63,78 +62,55 @@ func (ob *K8sObj) FetchUsedObjs() {
 		log.Printf("Error loading pods %v", err)
 	}
 	log.Printf("Iterating Pods For Used Storage Objects")
+
+	// Function Literal to Fetch Used Secrets and ConfigMap
+	usedSecretConfigMap := func(item v1.Container, ns string) {
+		if item.Env != nil {
+			for _, env := range item.Env {
+				if env.ValueFrom != nil {
+					if env.ValueFrom.SecretKeyRef != nil {
+						fetchsecret, _ := client.CoreV1().Secrets(ns).Get(context.TODO(), env.ValueFrom.SecretKeyRef.LocalObjectReference.Name, metav1.GetOptions{})
+						ob.Secrets = append(ob.Secrets, *fetchsecret)
+					} else if env.ValueFrom.ConfigMapKeyRef != nil {
+						fetchconfigmap, _ := client.CoreV1().ConfigMaps(ns).Get(context.TODO(), env.ValueFrom.ConfigMapKeyRef.LocalObjectReference.Name, metav1.GetOptions{})
+						ob.Configmaps = append(ob.Configmaps, *fetchconfigmap)
+					}
+				}
+
+			}
+		}
+		if item.EnvFrom != nil {
+			for _, envfrom := range item.EnvFrom {
+				if envfrom.SecretRef != nil {
+					fetchsecret, _ := client.CoreV1().Secrets(ns).Get(context.TODO(), envfrom.SecretRef.LocalObjectReference.Name, metav1.GetOptions{})
+					ob.Secrets = append(ob.Secrets, *fetchsecret)
+
+				} else if envfrom.ConfigMapRef != nil {
+					fetchconfigmap, _ := client.CoreV1().ConfigMaps(ns).Get(context.TODO(), envfrom.ConfigMapRef.LocalObjectReference.Name, metav1.GetOptions{})
+					if fetchconfigmap.Name != "" {
+						ob.Configmaps = append(ob.Configmaps, *fetchconfigmap)
+					}
+				}
+
+			}
+		}
+	}
+
 	for _, i := range pods.Items {
 		if !excludens.MatchString(i.Namespace) {
 			container := i.Spec.Containers
 			initcontainer := i.Spec.InitContainers
 			for _, item := range container {
-				if item.Env != nil {
-					for _, env := range item.Env {
-						if env.ValueFrom != nil {
-							if env.ValueFrom.SecretKeyRef != nil {
-								fetchsecret, _ := client.CoreV1().Secrets(i.Namespace).Get(context.TODO(), env.ValueFrom.SecretKeyRef.LocalObjectReference.Name, metav1.GetOptions{})
-								ob.Secrets = append(ob.Secrets, *fetchsecret)
-								// log.Printf("valuefrom:%v", fetchsecret.Name)
-							} else if env.ValueFrom.ConfigMapKeyRef != nil {
-								fetchconfigmap, _ := client.CoreV1().ConfigMaps(i.Namespace).Get(context.TODO(), env.ValueFrom.ConfigMapKeyRef.LocalObjectReference.Name, metav1.GetOptions{})
-								// log.Printf("valuefrom:%v", fetchconfigmap.Name)
-								ob.Configmaps = append(ob.Configmaps, *fetchconfigmap)
-							}
-						}
-
-					}
-				}
-				if item.EnvFrom != nil {
-					for _, envfrom := range item.EnvFrom {
-						if envfrom.SecretRef != nil {
-							fetchsecret, _ := client.CoreV1().Secrets(i.Namespace).Get(context.TODO(), envfrom.SecretRef.LocalObjectReference.Name, metav1.GetOptions{})
-							ob.Secrets = append(ob.Secrets, *fetchsecret)
-
-						} else if envfrom.ConfigMapRef != nil {
-							// log.Printf("Obj Reference - NAME: %v podname: %v", envfrom.ConfigMapRef.LocalObjectReference.Name, item.Name)
-							fetchconfigmap, _ := client.CoreV1().ConfigMaps(i.Namespace).Get(context.TODO(), envfrom.ConfigMapRef.LocalObjectReference.Name, metav1.GetOptions{})
-							if fetchconfigmap.Name != "" {
-								// log.Printf("envfrom:%v", fetchconfigmap.Name)
-								ob.Configmaps = append(ob.Configmaps, *fetchconfigmap)
-							}
-						}
-
-					}
-				}
+				log.Printf("Fetching Used Secrets & ConfigMaps")
+				usedSecretConfigMap(item, i.Namespace)
 			}
 			for _, item := range initcontainer {
-				if item.Env != nil {
-					for _, env := range item.Env {
-						if env.ValueFrom != nil {
-							if env.ValueFrom.SecretKeyRef != nil {
-								fetchsecret, _ := client.CoreV1().Secrets(i.Namespace).Get(context.TODO(), env.ValueFrom.SecretKeyRef.LocalObjectReference.Name, metav1.GetOptions{})
-								ob.Secrets = append(ob.Secrets, *fetchsecret)
-							} else if env.ValueFrom.ConfigMapKeyRef != nil {
-								fetchconfigmap, _ := client.CoreV1().ConfigMaps(i.Namespace).Get(context.TODO(), env.ValueFrom.ConfigMapKeyRef.LocalObjectReference.Name, metav1.GetOptions{})
-								ob.Configmaps = append(ob.Configmaps, *fetchconfigmap)
-							}
-						}
-
-					}
-				}
-				if item.EnvFrom != nil {
-					for _, envfrom := range item.EnvFrom {
-						if envfrom.SecretRef != nil {
-							fetchsecret, _ := client.CoreV1().Secrets(i.Namespace).Get(context.TODO(), envfrom.SecretRef.LocalObjectReference.Name, metav1.GetOptions{})
-							ob.Secrets = append(ob.Secrets, *fetchsecret)
-
-						} else if envfrom.ConfigMapRef != nil {
-							fetchconfigmap, _ := client.CoreV1().ConfigMaps(i.Namespace).Get(context.TODO(), envfrom.ConfigMapRef.LocalObjectReference.Name, metav1.GetOptions{})
-							if fetchconfigmap.Name != "" {
-								ob.Configmaps = append(ob.Configmaps, *fetchconfigmap)
-							}
-						}
-
-					}
-				}
+				usedSecretConfigMap(item, i.Namespace)
 			}
+
 			if i.Spec.Volumes != nil {
 				for _, volume := range i.Spec.Volumes {
+					log.Printf("Fetching Used PVCs")
 					if volume.VolumeSource.Secret != nil {
 						fetchsecret, _ := client.CoreV1().Secrets(i.Namespace).Get(context.TODO(), volume.VolumeSource.Secret.SecretName, metav1.GetOptions{})
 						ob.Secrets = append(ob.Secrets, *fetchsecret)
@@ -204,7 +180,7 @@ func GetUnusedObjs(used K8sObj) K8sObj {
 
 	}
 
-	//Get Un-Used Ingresses
+	//Get UnUsed Ingresses
 	ings, err := client.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		log.Printf("Error loading Ingress %v", err)
@@ -286,8 +262,8 @@ func GetUnusedObjs(used K8sObj) K8sObj {
 	return staleObjs
 }
 
-// Builds annotation value struct that will be added to stale objects
-func (n *staleObjData) CreateAnnotationData() {
+// Builds annotation json value struct that will be applied to stale objects
+func (n *staleObjData) BuildAnnotationData() {
 	overrideStatus, _ := os.LookupEnv("OVERRIDE_STATUS")
 	if overrideStatus == "" {
 		n.ObjStatus = "NotInUse"
@@ -298,78 +274,48 @@ func (n *staleObjData) CreateAnnotationData() {
 	n.LastCheckTime = time.Now().Format(time.RFC3339Nano)
 }
 
+// Set stale annotation to an Object
+func SetCustomAnnotate(object *metav1.ObjectMeta, data *staleObjData) {
+	annotations := object.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+		jsonStr, err := json.Marshal(data)
+		if err != nil {
+			fmt.Printf("Error: %s", err.Error())
+		}
+		annotations["***REMOVED***/stale-object"] = string(jsonStr)
+	} else {
+		jsonStr, err := json.Marshal(data)
+		if err != nil {
+			fmt.Printf("Error: %s", err.Error())
+		}
+		annotations["***REMOVED***/stale-object"] = string(jsonStr)
+	}
+	object.SetAnnotations(annotations)
+}
+
 // Annotate using above struct
 func (n *K8sObj) AnnotateStaleObj(m *staleObjData) {
-	// TODO -> Use reflect or lambda
-
 	// Annotate ConfigMap
 	cms := n.Configmaps
 	for _, i := range cms {
-		annotations := i.GetAnnotations()
-
-		if annotations == nil {
-			annotations = make(map[string]string)
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-
-		} else {
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-		}
-		i.SetAnnotations(annotations)
+		SetCustomAnnotate(&i.ObjectMeta, m)
 		client.CoreV1().ConfigMaps(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
 		log.Printf("Updated Annotation on CM: %v", i.Name)
 	}
+
 	// Annotate Services
 	svc := n.Services
 	for _, i := range svc {
-
-		annotations := i.GetAnnotations()
-		if annotations == nil {
-			annotations = make(map[string]string)
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-
-		} else {
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-		}
-		i.SetAnnotations(annotations)
+		SetCustomAnnotate(&i.ObjectMeta, m)
 		client.CoreV1().Services(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
 		log.Printf("Updated Annotation on Service: %v", i.Name)
 	}
+
 	// Annotate Secrets
 	secret := n.Secrets
 	for _, i := range secret {
-		annotations := i.GetAnnotations()
-		if annotations == nil {
-			annotations = make(map[string]string)
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-
-		} else {
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-		}
-		i.SetAnnotations(annotations)
+		SetCustomAnnotate(&i.ObjectMeta, m)
 		client.CoreV1().Secrets(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
 		log.Printf("Updated Annotation on Secret: %v", i.Name)
 	}
@@ -377,23 +323,7 @@ func (n *K8sObj) AnnotateStaleObj(m *staleObjData) {
 	// Annotate PVC
 	pvc := n.PersistentVolumeClaims
 	for _, i := range pvc {
-		annotations := i.GetAnnotations()
-		if annotations == nil {
-			annotations = make(map[string]string)
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-
-		} else {
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-		}
-		i.SetAnnotations(annotations)
+		SetCustomAnnotate(&i.ObjectMeta, m)
 		client.CoreV1().PersistentVolumeClaims(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
 		log.Printf("Updated Annotation on PVC: %v", i.Name)
 	}
@@ -401,23 +331,7 @@ func (n *K8sObj) AnnotateStaleObj(m *staleObjData) {
 	// Annotate Ingress
 	ingress := n.Ingress
 	for _, i := range ingress {
-		annotations := i.GetAnnotations()
-		if annotations == nil {
-			annotations = make(map[string]string)
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-
-		} else {
-			jsonStr, err := json.Marshal(m)
-			if err != nil {
-				fmt.Printf("Error: %s", err.Error())
-			}
-			annotations["***REMOVED***/stale-object"] = string(jsonStr)
-		}
-		i.SetAnnotations(annotations)
+		SetCustomAnnotate(&i.ObjectMeta, m)
 		client.NetworkingV1().Ingresses(i.Namespace).Update(context.TODO(), &i, metav1.UpdateOptions{})
 		log.Printf("Updated Annotation on Ingress: %v", i.Name)
 	}
