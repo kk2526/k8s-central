@@ -1,4 +1,4 @@
-# k8s-central
+# KUBESTALE
 
 ## Requirement 
 * A running kubernetes cluster. 
@@ -13,7 +13,7 @@ Runs on a hourly basis and annotates your Kubernetes objects which are not being
 ### API 
 To retrieve those Kubernetes unused objects which controller annotated and some other functionality 
 
-### UI
+### Plugin
 Coming Soon...
 
 ## Installation & Run
