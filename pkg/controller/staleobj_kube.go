@@ -283,13 +283,13 @@ func SetCustomAnnotate(object *metav1.ObjectMeta, data *staleObjData) {
 		if err != nil {
 			fmt.Printf("Error: %s", err.Error())
 		}
-		annotations["***REMOVED***/stale-object"] = string(jsonStr)
+		annotations["kubernetes.io/stale-object"] = string(jsonStr)
 	} else {
 		jsonStr, err := json.Marshal(data)
 		if err != nil {
 			fmt.Printf("Error: %s", err.Error())
 		}
-		annotations["***REMOVED***/stale-object"] = string(jsonStr)
+		annotations["kubernetes.io/stale-object"] = string(jsonStr)
 	}
 	object.SetAnnotations(annotations)
 }

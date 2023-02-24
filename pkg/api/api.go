@@ -3,11 +3,11 @@ package api
 import (
 	"net/http"
 
-	***REMOVED*** "github.com/kk2526/k8s-central/pkg/utils"
+	utils "github.com/kk2526/k8s-central/pkg/utils"
 )
 
 func init() {
-	client = ***REMOVED***.CreateK8sClient()
+	client = utils.CreateK8sClient()
 
 }
 
