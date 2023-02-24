@@ -286,7 +286,7 @@ func SetCustomAnnotate(object *metav1.ObjectMeta, data *staleObjData) {
 <<<<<<< HEAD
 		annotations["kubernetes.io/stale-object"] = string(jsonStr)
 =======
-		annotations["***REMOVED***/stale-object"] = string(jsonStr)
+		annotations["kubernetes.io/stale-object"] = string(jsonStr)
 >>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 	} else {
 		jsonStr, err := json.Marshal(data)
@@ -296,7 +296,7 @@ func SetCustomAnnotate(object *metav1.ObjectMeta, data *staleObjData) {
 <<<<<<< HEAD
 		annotations["kubernetes.io/stale-object"] = string(jsonStr)
 =======
-		annotations["***REMOVED***/stale-object"] = string(jsonStr)
+		annotations["kubernetes.io/stale-object"] = string(jsonStr)
 >>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 	}
 	object.SetAnnotations(annotations)
