@@ -4,13 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
+<<<<<<< HEAD
 	utils "github.com/kk2526/k8s-central/pkg/utils"
+=======
+	***REMOVED*** "github.com/kk2526/k8s-central/pkg/utils"
+>>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 )
 
 func ObjectsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	var (
+<<<<<<< HEAD
 		objResponseData utils.K8sObj
+=======
+		objResponseData ***REMOVED***.K8sObj
+>>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 		resp            APIResponse
 	)
 
@@ -30,7 +38,11 @@ func ObjectsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	case "pods":
 		objResponseData.GetPods(client, reqParam.namespace, reqParam.podState)
 	case "namespaces":
+<<<<<<< HEAD
 		resp.Data = utils.GetNamespaces(client)
+=======
+		resp.Data = ***REMOVED***.GetNamespaces(client)
+>>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 	default:
 		fallthrough
 	case "all":
@@ -46,6 +58,10 @@ func ObjectsAPIHandler(w http.ResponseWriter, r *http.Request) {
 		resp.Data = objResponseData
 	}
 
+<<<<<<< HEAD
 	respJSON, _ := utils.EncodeJSON(resp)
+=======
+	respJSON, _ := ***REMOVED***.EncodeJSON(resp)
+>>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 	fmt.Fprint(w, respJSON)
 }
