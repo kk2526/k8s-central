@@ -1,4 +1,4 @@
-module github.com/kk2526/k8s-central
+module github.com/kk2526/kube-stale
 
 go 1.19
 
@@ -48,4 +48,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace github.com/kk2526/k8s-central => ../k8s-central
+replace github.com/kk2526/kube-stale => ../kube-stale

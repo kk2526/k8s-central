@@ -27,11 +27,8 @@ func (c *K8sObj) GetConfigMaps(Client *clientset.Clientset, ns string, st bool) 
 		}
 		for _, i := range m.Items {
 			a := i.GetAnnotations()
-<<<<<<< HEAD
 			js := a["kubernetes.io/stale-object"]
-=======
-			js := a["kubernetes.io/stale-object"]
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
+
 			json.Unmarshal([]byte(js), &tmpObjData)
 			if js != "" && tmpObjData.ObjStatus == "NotInUse" {
 				c.Configmaps = append(c.Configmaps, i)
@@ -58,11 +55,8 @@ func (c *K8sObj) GetSecrets(Client *clientset.Clientset, ns string, st bool) {
 		}
 		for _, i := range m.Items {
 			a := i.GetAnnotations()
-<<<<<<< HEAD
+
 			js := a["kubernetes.io/stale-object"]
-=======
-			js := a["kubernetes.io/stale-object"]
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 			json.Unmarshal([]byte(js), &tmpObjData)
 			if js != "" && tmpObjData.ObjStatus == "NotInUse" {
 				c.Secrets = append(c.Secrets, i)
@@ -89,11 +83,7 @@ func (c *K8sObj) GetPVC(Client *clientset.Clientset, ns string, st bool) {
 		}
 		for _, i := range m.Items {
 			a := i.GetAnnotations()
-<<<<<<< HEAD
 			js := a["kubernetes.io/stale-object"]
-=======
-			js := a["kubernetes.io/stale-object"]
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 			json.Unmarshal([]byte(js), &tmpObjData)
 			if js != "" && tmpObjData.ObjStatus == "NotInUse" {
 				c.PersistentVolumeClaims = append(c.PersistentVolumeClaims, i)
@@ -120,11 +110,7 @@ func (c *K8sObj) GetServices(Client *clientset.Clientset, ns string, st bool) {
 
 		for _, i := range m.Items {
 			a := i.GetAnnotations()
-<<<<<<< HEAD
 			js := a["kubernetes.io/stale-object"]
-=======
-			js := a["kubernetes.io/stale-object"]
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
 			json.Unmarshal([]byte(js), &tmpObjData)
 			if js != "" && tmpObjData.ObjStatus == "NotInUse" {
 				c.Services = append(c.Services, i)
@@ -151,11 +137,8 @@ func (c *K8sObj) GetDeployment(Client *clientset.Clientset, ns string, st bool) 
 
 		for _, i := range m.Items {
 			a := i.GetAnnotations()
-<<<<<<< HEAD
 			js := a["kubernetes.io/stale-object"]
-=======
-			js := a["kubernetes.io/stale-object"]
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
+
 			json.Unmarshal([]byte(js), &tmpObjData)
 			if js != "" && tmpObjData.ObjStatus == "NotInUse" {
 				c.Deployments = append(c.Deployments, i)

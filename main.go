@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	api "github.com/kk2526/k8s-central/pkg/api"
-	controller "github.com/kk2526/k8s-central/pkg/controller"
-	"github.com/kk2526/k8s-central/pkg/utils"
+	"github.com/kk2526/kube-stale/pkg/utils"
+	api "github.com/kube-stale/pkg/api"
+	controller "github.com/kube-stale/pkg/controller"
 )
 
 var profile string

@@ -22,14 +22,14 @@ Coming Soon...
 export APP_PROFILE=api|controller|dev (dev runs both api & controller)    [default value = api]
 
 # How To Download & Run
-go get github.com/kk2526/k8s-central
+go get github.com/kk2526/kube-stale
 cd $GOPATH/bin
-./k8s-central
+./kube-stale
 
 or
 
-git clone github.com/kk2526/k8s-central
-cd k8s-central
+git clone github.com/kk2526/kube-stale
+cd kube-stale
 go run .
 
 # API Endpoint : http://localhost:8000

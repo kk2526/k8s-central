@@ -4,23 +4,15 @@ import (
 	"log"
 	"time"
 
-<<<<<<< HEAD
-	utils "github.com/kk2526/k8s-central/pkg/utils"
-=======
-	utils "github.com/kk2526/k8s-central/pkg/utils"
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
+	utils "github.com/kube-stale/pkg/utils"
+
 	clientset "k8s.io/client-go/kubernetes"
 )
 
 var client *clientset.Clientset
 
 func init() {
-<<<<<<< HEAD
 	client = utils.CreateK8sClient()
-=======
-	client = utils.CreateK8sClient()
->>>>>>> 493881d5b0235aa47da0912003042c00c4526d6e
-
 }
 
 func Run() {
